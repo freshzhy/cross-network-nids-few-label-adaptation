@@ -189,7 +189,7 @@ def plot_fig1(metrics_by_ds):
 
     pass
     fig.tight_layout()
-    save_fig(fig,"Fig1_classification_performance")
+    save_fig(fig,"FigS3_classification_performance")
 
 
 # ── Figure 2：SHAP 热力图（统一色标，特征名缩写）─────────────────────────────
@@ -357,7 +357,7 @@ def plot_fig4(rq2_data):
 
     pass  # caption is given in the paper
     fig.tight_layout()
-    save_fig(fig,"Fig4_cross_dataset_similarity")
+    save_fig(fig,"Fig3_cross_dataset_similarity")
 
 
 # ── Figure 5：共同特征（只保留 n≥2 的特征，大幅缩短）────────────────────────
@@ -453,7 +453,7 @@ def plot_fig5(rq2_data,topk_by_ds):
 
     pass  # caption is given in the paper
     fig.tight_layout()
-    save_fig(fig,"Fig5_dos_feature_overlap")
+    save_fig(fig,"FigS5_dos_feature_overlap")
 
 
 def parse_args():

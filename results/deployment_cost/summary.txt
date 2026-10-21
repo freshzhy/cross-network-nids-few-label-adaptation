@@ -1,0 +1,68 @@
+实验 B：部署成本（单线程计时；均值 over seeds）
+
+seeds：[42, 43, 44, 45, 46]；xgboost 3.2.0
+
+semantic_class target  n_seeds  fit_s_full40  fit_s_top10  fit_speedup  select_s_once  model_bytes_full40  model_bytes_top10  lat_med_us_full40  lat_med_us_top10  throughput_fps_full40  throughput_fps_top10  thr_ratio  f1_full40  f1_top10
+           DoS    BoT        5         4.979        2.388        2.085         24.941            950861.4           959728.4            118.117           117.150             425903.865            432731.189      1.016      0.952     0.952
+           DoS    CIC        5         4.126        1.796        2.297          6.997            324679.8           323280.6             60.471            59.750             713860.398            715489.352      1.002      1.000     1.000
+           DoS    ToN        5         4.948        2.400        2.062         25.160           1013647.0          1007904.8            116.354           116.904             426903.046            427706.074      1.002      0.900     0.898
+           DoS   UNSW        5         1.096        0.501        2.186          4.338            790071.8           856552.2            104.367           107.383             442679.995            443586.714      1.002      0.916     0.912
+Reconnaissance    BoT        5         4.750        2.277        2.086         23.324            947594.2           942768.0            119.658           117.796             426977.550            430513.425      1.008      0.972     0.971
+Reconnaissance    ToN        5         4.386        2.240        1.957         23.236            891400.0           933124.0            108.117           115.900             432708.919            434788.271      1.005      0.977     0.972
+Reconnaissance   UNSW        5         2.155        0.990        2.177          7.375            669219.6           697711.6             97.067            99.458             446565.038            449042.475      1.006      0.965     0.965
+
+
+跨 7 个配置的中位数：
+  fit_speedup: 中位数 2.086（范围 1.957–2.297）
+  size_ratio: 中位数 1.009（范围 0.994–1.084）
+  lat_ratio: 中位数 1.005（范围 0.984–1.072）
+  thr_ratio: 中位数 1.005（范围 1.002–1.016）
+  F1 差（Full-40 − Top-10）：最大 0.0051
+
+字段需求（L1 基本计数器 / L1d 可由计数器推导的速率 / L2 逐包头部统计 / L3 应用层解析）：
+semantic_class dataset                     feature_set  n_L1  n_L1d  n_L2  n_L3  needs_dpi  needs_probe max_level
+           DoS     BoT Target-SHAP-10 (per seed, mean)   3.0    1.6   5.4   0.0        0.0          1.0        L2
+           DoS     CIC Target-SHAP-10 (per seed, mean)   2.4    0.2   6.4   1.0        1.0          1.0        L3
+           DoS     ToN Target-SHAP-10 (per seed, mean)   1.6    2.2   3.4   2.8        1.0          1.0        L3
+           DoS    UNSW Target-SHAP-10 (per seed, mean)   3.8    1.8   3.8   0.6        0.6          1.0        L3
+Reconnaissance     BoT Target-SHAP-10 (per seed, mean)   4.0    1.0   5.0   0.0        0.0          1.0        L2
+Reconnaissance     ToN Target-SHAP-10 (per seed, mean)   3.4    2.0   3.6   1.0        1.0          1.0        L3
+Reconnaissance    UNSW Target-SHAP-10 (per seed, mean)   2.2    1.2   6.0   0.6        0.6          1.0        L3
+           DoS    UNSW                  Source SHAP-10   4.0    1.0   5.0   0.0        0.0          1.0        L2
+           DoS    UNSW                    Source MI-10   2.0    3.0   5.0   0.0        0.0          1.0        L2
+           DoS    UNSW                  Source Gain-10   0.0    1.0   8.0   1.0        1.0          1.0        L3
+           DoS    UNSW           Source SHAP-10-NoPort   3.0    2.0   5.0   0.0        0.0          1.0        L2
+           DoS     CIC                  Source SHAP-10   3.0    1.0   6.0   0.0        0.0          1.0        L2
+           DoS     CIC                    Source MI-10   4.0    2.0   4.0   0.0        0.0          1.0        L2
+           DoS     CIC                  Source Gain-10   2.0    2.0   6.0   0.0        0.0          1.0        L2
+           DoS     CIC           Source SHAP-10-NoPort   1.0    1.0   8.0   0.0        0.0          1.0        L2
+           DoS     ToN                  Source SHAP-10   2.0    1.0   4.0   3.0        1.0          1.0        L3
+           DoS     ToN                    Source MI-10   3.0    3.0   4.0   0.0        0.0          1.0        L2
+           DoS     ToN                  Source Gain-10   2.0    0.0   7.0   1.0        1.0          1.0        L3
+           DoS     ToN           Source SHAP-10-NoPort   2.0    1.0   4.0   3.0        1.0          1.0        L3
+           DoS     BoT                  Source SHAP-10   3.0    1.0   6.0   0.0        0.0          1.0        L2
+           DoS     BoT                    Source MI-10   2.0    2.0   6.0   0.0        0.0          1.0        L2
+           DoS     BoT                  Source Gain-10   3.0    1.0   6.0   0.0        0.0          1.0        L2
+           DoS     BoT           Source SHAP-10-NoPort   2.0    1.0   7.0   0.0        0.0          1.0        L2
+Reconnaissance    UNSW                  Source SHAP-10   2.0    1.0   6.0   1.0        1.0          1.0        L3
+Reconnaissance    UNSW                    Source MI-10   2.0    4.0   4.0   0.0        0.0          1.0        L2
+Reconnaissance    UNSW                  Source Gain-10   1.0    1.0   5.0   3.0        1.0          1.0        L3
+Reconnaissance    UNSW           Source SHAP-10-NoPort   1.0    1.0   7.0   1.0        1.0          1.0        L3
+Reconnaissance     ToN                  Source SHAP-10   4.0    2.0   3.0   1.0        1.0          1.0        L3
+Reconnaissance     ToN                    Source MI-10   5.0    1.0   4.0   0.0        0.0          1.0        L2
+Reconnaissance     ToN                  Source Gain-10   3.0    2.0   4.0   1.0        1.0          1.0        L3
+Reconnaissance     ToN           Source SHAP-10-NoPort   3.0    2.0   4.0   1.0        1.0          1.0        L3
+Reconnaissance     BoT                  Source SHAP-10   4.0    1.0   5.0   0.0        0.0          1.0        L2
+Reconnaissance     BoT                    Source MI-10   4.0    2.0   4.0   0.0        0.0          1.0        L2
+Reconnaissance     BoT                  Source Gain-10   4.0    1.0   4.0   1.0        1.0          1.0        L3
+Reconnaissance     BoT           Source SHAP-10-NoPort   3.0    1.0   6.0   0.0        0.0          1.0        L2
+             —       —                         Full-40   9.0    4.0  22.0   5.0        1.0          1.0        L3
+
+Target-SHAP-10 需要 DPI（L3）的 seed 比例：semantic_class dataset  needs_dpi
+           DoS     BoT        0.0
+           DoS     CIC        1.0
+           DoS     ToN        1.0
+           DoS    UNSW        0.6
+Reconnaissance     BoT        0.0
+Reconnaissance     ToN        1.0
+Reconnaissance    UNSW        0.6

@@ -8,6 +8,8 @@
 #   ./run.sh rq2            RQ2 cross-dataset similarity
 #   ./run.sh rq3            RQ3 diagnostics, transfer experiment (30 seeds), JSD
 #   ./run.sh robustness     dedup / train-SHAP / re-selection / scenario ablation
+#   ./run.sh rq4            RQ4 target-label budget (orig + dedup + post hoc) and variant hold-out
+#   ./run.sh cost           deployment cost (Full-40 vs Top-10) and NetFlow field requirements
 #   ./run.sh figures        all paper figures -> results/figures/
 #   ./run.sh all            everything above, in order
 #   ./run.sh status         progress of the long-running steps
@@ -15,10 +17,11 @@
 # Any step can be sent to the background (keeps running after the terminal
 # closes; on macOS the machine is kept awake):
 #   ./run.sh bg rq3         log: results/logs/rq3.log   stop: kill $(cat results/logs/rq3.pid)
-# The RQ3 experiments resume from completed tasks when restarted.
+# The RQ3 / RQ4 experiments resume from completed tasks when restarted.
 #
 # Interpreter: $PY if set, else .venv/bin/python, else python3.
-# Parallelism: WORKERS / THREADS environment variables (passed to rq3_transfer).
+# Parallelism: WORKERS / THREADS environment variables (rq3_transfer, rq4_*; cost uses WORKERS only,
+# default 1 so that the single-threaded timings are not disturbed).
 # N_SEEDS overrides the number of RQ3 seeds (for a quick test only).
 # ─────────────────────────────────────────────────────────────────────────────
 set -euo pipefail
@@ -109,17 +112,45 @@ step_robustness() {
   log "Robustness 5/5: RQ3 without scenario-specific features"; transfer "$R/rq3_noscenario"     --variant noscenario
 }
 
+step_rq4() {
+  need "$R/rq3_main/feature_sets.json" "$R/rq3_main/raw.csv" "$R/rq3_dedup/raw.csv" "$R/rq3_diagnostics/raw_class_counts.json"
+  local B=code/rq4_label_budget.py
+  log "RQ4 1/6: label budget, original data (pre-specified budgets 10…All)"; "$PY" $B run ${PAR[@]+"${PAR[@]}"}
+  log "RQ4 2/6: label budget, deduplicated data";                       "$PY" $B run --dedup ${PAR[@]+"${PAR[@]}"}
+  log "RQ4 3/6: post hoc budgets 1/2/5 (original and deduplicated)"
+  "$PY" $B run --posthoc ${PAR[@]+"${PAR[@]}"}; "$PY" $B run --dedup --posthoc ${PAR[@]+"${PAR[@]}"}
+  log "RQ4 4/6: exact-duplicate diagnostic"; "$PY" $B dupdiag; "$PY" $B dupdiag --dedup
+  log "RQ4 5/6: aggregate"
+  "$PY" $B aggregate > /dev/null; "$PY" $B aggregate --dedup > /dev/null; "$PY" $B compare > /dev/null
+  log "RQ4 6/6: variant-held-out stress test"
+  "$PY" code/rq4_variant_holdout.py run ${PAR[@]+"${PAR[@]}"}
+  "$PY" code/rq4_variant_holdout.py aggregate > /dev/null
+  log "  -> $R/rq4_budget/summary.txt, $R/rq4_budget_dedup/compare_orig_vs_dedup.txt, $R/rq4_variant/summary.txt"
+}
+
+step_cost() {
+  need "$R/rq3_main/feature_sets.json"
+  log "Deployment cost and field requirements (single-threaded timings)"
+  "$PY" code/deployment_cost.py run --workers "${WORKERS:-1}"
+  "$PY" code/deployment_cost.py aggregate > /dev/null
+  log "  -> $R/deployment_cost/summary.txt"
+}
+
 step_figures() {
   log "Figures"
   "$PY" code/plot_figures_rq1_rq2.py --rq1-dir "$R/rq1_signatures" --rq2-dir "$R/rq2_similarity"
   "$PY" code/plot_figures_rq3.py
+  "$PY" code/plot_framework.py; "$PY" code/plot_framework.py --ga        # Fig. 1 and graphical abstract
+  "$PY" code/plot_figures_rq4.py                                          # Figs. 7 and 8
   for e in pdf png; do                      # Fig. 3 is drawn by rq1_distinctiveness.py
-    cp "$R/rq1_distinctiveness/summary_figure.$e" "$R/figures/Fig3_intra_distinctiveness.$e"
+    cp "$R/rq1_distinctiveness/summary_figure.$e" "$R/figures/FigS4_intra_distinctiveness.$e"
+    cp "$R/rq4_budget_dedup/fig_orig_vs_dedup.$e" "$R/figures/FigS7_orig_vs_dedup.$e"
+    cp "$R/rq4_budget/fig_budget_per_config_f1.$e" "$R/figures/FigS8_budget_per_config.$e"
   done
   log "  -> $R/figures/"
 }
 
-step_all() { step_preprocess; step_rq1; step_rq2; step_rq3; step_robustness; step_figures; }
+step_all() { step_preprocess; step_rq1; step_rq2; step_rq3; step_robustness; step_rq4; step_cost; step_figures; }
 
 step_status() {
   tail -n 8 "$LOGS/pipeline.log" 2>/dev/null || echo "(nothing started yet)"
@@ -133,10 +164,16 @@ step_status() {
     [ -f "$R/$d/run_config.json" ] || continue
     echo "── $d"; "$PY" code/rq3_transfer.py status $a 2>/dev/null | head -6 || true
   done
+  if [ -f "$R/rq4_budget/run_config.json" ]; then
+    echo "── rq4_budget";  "$PY" code/rq4_label_budget.py status 2>/dev/null | head -4 || true
+    echo "── rq4_budget_dedup"; "$PY" code/rq4_label_budget.py status --dedup 2>/dev/null | head -4 || true
+  fi
+  [ -f "$R/rq4_variant/run_config.json" ] && { echo "── rq4_variant"; "$PY" code/rq4_variant_holdout.py status 2>/dev/null | head -4 || true; }
+  [ -f "$R/deployment_cost/run_config.json" ] && { echo "── deployment_cost"; "$PY" code/deployment_cost.py status 2>/dev/null | head -4 || true; }
 }
 
 # ── dispatch ─────────────────────────────────────────────────────────────────
-STEPS="setup preprocess rq1 rq2 rq3 robustness figures all status"
+STEPS="setup preprocess rq1 rq2 rq3 robustness rq4 cost figures all status"
 cmd=${1:-}
 if [ "$cmd" = bg ]; then
   s=${2:-}; [[ " $STEPS " == *" $s "* && $s != status && $s != setup ]] || { echo "usage: ./run.sh bg <step>"; exit 1; }
@@ -151,6 +188,6 @@ if [ "$cmd" = bg ]; then
   echo "  stop:     kill \$(cat $LOGS/$s.pid)   (re-running resumes)"
   exit 0
 fi
-[[ -n "$cmd" && " $STEPS " == *" $cmd "* ]] || { sed -n '2,22p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
+[[ -n "$cmd" && " $STEPS " == *" $cmd "* ]] || { sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; exit 1; }
 [ "$cmd" = setup ] || check_deps
 "step_$cmd"

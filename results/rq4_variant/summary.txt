@@ -1,0 +1,74 @@
+变体留出压力测试（variant-held-out stress test）
+========================================================================
+seed 42–51；分类器 Full-40；零样本基线 = max(Full-40-Direct, SHAP-10-Direct)，各自先对源网络平均
+判读（预先设定，主指标 PR-AUC，预算 10）：persists = unseen ≥ 0.8×seen 且 ≥9/10 seed 高于零样本；degraded-useful = 比零样本高 ≥0.05；否则 fails。
+
+A. CIC DoS 留一变体（主测试）
+  LOVO:GoldenEye             [5] unseen 0.649 / seen 0.839 / 零样本 0.239 → degraded-useful  [10] unseen 0.754 / seen 0.888 / 零样本 0.239 → persists  [25] unseen 0.980 / seen 0.986 / 零样本 0.239 → persists
+  LOVO:Hulk                  [5] unseen 0.869 / seen 0.832 / 零样本 0.245 → persists  [10] unseen 0.883 / seen 0.910 / 零样本 0.245 → persists  [25] unseen 0.962 / seen 0.998 / 零样本 0.245 → persists
+  LOVO:SlowHTTPTest          [5] unseen 0.615 / seen 0.874 / 零样本 0.264 → degraded-useful  [10] unseen 0.687 / seen 0.933 / 零样本 0.264 → degraded-useful  [25] unseen 0.701 / seen 0.991 / 零样本 0.264 → degraded-useful
+  LOVO:Slowloris             [5] unseen 0.439 / seen 0.863 / 零样本 0.178 → degraded-useful  [10] unseen 0.499 / seen 0.943 / 零样本 0.178 → degraded-useful  [25] unseen 0.774 / seen 0.989 / 零样本 0.178 → degraded-useful
+
+B. 同网络攻击族互换（次级测试）
+  CIC:DoS→DDoS               [5] unseen 0.513 / seen 0.819 / 零样本 0.158 → degraded-useful  [10] unseen 0.517 / seen 0.902 / 零样本 0.158 → degraded-useful  [25] unseen 0.818 / seen 0.978 / 零样本 0.158 → persists
+  CIC:DDoS→DoS               [5] unseen 0.558 / seen 0.947 / 零样本 0.238 → degraded-useful  [10] unseen 0.607 / seen 0.982 / 零样本 0.238 → degraded-useful  [25] unseen 0.646 / seen 0.988 / 零样本 0.238 → degraded-useful
+  ToN:DoS→DDoS               [5] unseen 0.091 / seen 0.611 / 零样本 0.222 → fails  [10] unseen 0.076 / seen 0.756 / 零样本 0.222 → fails  [25] unseen 0.074 / seen 0.890 / 零样本 0.222 → fails
+  ToN:DDoS→DoS               [5] unseen 0.126 / seen 0.596 / 零样本 0.096 → fails  [10] unseen 0.154 / seen 0.765 / 零样本 0.096 → degraded-useful  [25] unseen 0.175 / seen 0.855 / 零样本 0.096 → degraded-useful
+  BoT:DoS→DDoS               [5] unseen 0.196 / seen 0.695 / 零样本 0.213 → fails  [10] unseen 0.280 / seen 0.763 / 零样本 0.213 → degraded-useful  [25] unseen 0.332 / seen 0.859 / 零样本 0.213 → degraded-useful
+  BoT:DDoS→DoS               [5] unseen 0.236 / seen 0.996 / 零样本 0.194 → fails  [10] unseen 0.295 / seen 0.996 / 零样本 0.194 → degraded-useful  [25] unseen 0.329 / seen 0.996 / 零样本 0.194 → degraded-useful
+
+unseen 测试集 PR-AUC（seed 均值）
+budget                 1      2      5     10     25     50    100    All    零样本  seen@10
+test_id                                                                                  
+LOVO:GoldenEye     0.236  0.420  0.649  0.754  0.980  1.000  1.000  1.000  0.239    0.888
+LOVO:Hulk          0.563  0.643  0.869  0.883  0.962  0.992  0.998  1.000  0.245    0.910
+LOVO:SlowHTTPTest  0.392  0.464  0.615  0.687  0.701  0.654  0.644  0.742  0.264    0.933
+LOVO:Slowloris     0.461  0.321  0.439  0.499  0.774  0.882  0.959  1.000  0.178    0.943
+CIC:DoS→DDoS       0.332  0.449  0.513  0.517  0.818  0.950  0.934  0.931  0.158    0.902
+CIC:DDoS→DoS       0.420  0.546  0.558  0.607  0.646  0.793  0.782  0.792  0.238    0.982
+ToN:DoS→DDoS       0.101  0.112  0.091  0.076  0.074  0.073  0.069  0.191  0.222    0.756
+ToN:DDoS→DoS       0.093  0.107  0.126  0.154  0.175  0.187  0.252  0.799  0.096    0.765
+BoT:DoS→DDoS       0.257  0.242  0.196  0.280  0.332  0.409  0.513  0.988  0.213    0.763
+BoT:DDoS→DoS       0.194  0.215  0.236  0.295  0.329  0.349  0.391  0.911  0.194    0.996
+
+unseen 测试集 F1（seed 均值）
+budget                 1      2      5     10     25     50    100    All    零样本  seen@10
+test_id                                                                                  
+LOVO:GoldenEye     0.168  0.346  0.576  0.614  0.926  0.990  0.996  1.000  0.092    0.844
+LOVO:Hulk          0.397  0.601  0.795  0.827  0.919  0.907  0.972  0.999  0.093    0.842
+LOVO:SlowHTTPTest  0.361  0.304  0.274  0.152  0.000  0.000  0.000  0.000  0.003    0.871
+LOVO:Slowloris     0.363  0.289  0.217  0.208  0.442  0.443  0.554  0.771  0.083    0.889
+CIC:DoS→DDoS       0.137  0.380  0.331  0.238  0.636  0.861  0.788  0.000  0.000    0.840
+CIC:DDoS→DoS       0.062  0.212  0.273  0.192  0.203  0.135  0.027  0.000  0.087    0.943
+ToN:DoS→DDoS       0.035  0.025  0.039  0.041  0.026  0.028  0.029  0.037  0.000    0.686
+ToN:DDoS→DoS       0.053  0.018  0.036  0.050  0.083  0.064  0.095  0.537  0.041    0.708
+BoT:DoS→DDoS       0.109  0.092  0.006  0.160  0.209  0.301  0.409  0.932  0.000    0.768
+BoT:DDoS→DoS       0.010  0.023  0.011  0.011  0.023  0.023  0.038  0.698  0.127    0.974
+
+unseen 测试集 TPR@1%FPR（seed 均值）
+budget                 1      2      5     10     25     50    100    All    零样本  seen@10
+test_id                                                                                  
+LOVO:GoldenEye     0.032  0.096  0.323  0.400  0.935  1.000  1.000  1.000  0.119    0.735
+LOVO:Hulk          0.297  0.248  0.649  0.690  0.968  0.999  0.999  1.000  0.103    0.769
+LOVO:SlowHTTPTest  0.063  0.108  0.041  0.099  0.165  0.110  0.148  0.000  0.099    0.821
+LOVO:Slowloris     0.066  0.022  0.072  0.119  0.508  0.666  0.908  1.000  0.040    0.839
+CIC:DoS→DDoS       0.005  0.153  0.108  0.146  0.629  0.895  0.830  0.797  0.019    0.796
+CIC:DDoS→DoS       0.003  0.032  0.091  0.227  0.375  0.563  0.594  0.423  0.097    0.962
+ToN:DoS→DDoS       0.000  0.004  0.005  0.007  0.013  0.015  0.016  0.020  0.005    0.482
+ToN:DDoS→DoS       0.001  0.004  0.002  0.033  0.028  0.048  0.071  0.720  0.004    0.510
+BoT:DoS→DDoS       0.008  0.001  0.001  0.039  0.037  0.153  0.141  0.978  0.000    0.400
+BoT:DDoS→DoS       0.005  0.006  0.006  0.006  0.013  0.045  0.053  0.793  0.010    0.995
+
+unseen 测试集 pAUC@1%FPR（seed 均值）
+budget                 1      2      5     10     25     50    100    All    零样本  seen@10
+test_id                                                                                  
+LOVO:GoldenEye     0.508  0.515  0.561  0.625  0.935  0.999  1.000  1.000  0.536    0.791
+LOVO:Hulk          0.603  0.557  0.760  0.782  0.907  0.984  0.995  1.000  0.524    0.844
+LOVO:SlowHTTPTest  0.533  0.536  0.515  0.530  0.536  0.512  0.502  0.497  0.521    0.888
+LOVO:Slowloris     0.537  0.506  0.526  0.537  0.685  0.764  0.889  0.999  0.507    0.886
+CIC:DoS→DDoS       0.511  0.557  0.529  0.545  0.752  0.899  0.900  0.883  0.502    0.844
+CIC:DDoS→DoS       0.511  0.511  0.532  0.566  0.618  0.686  0.688  0.584  0.524    0.967
+ToN:DoS→DDoS       0.498  0.499  0.499  0.500  0.502  0.502  0.502  0.505  0.498    0.672
+ToN:DDoS→DoS       0.498  0.499  0.498  0.507  0.499  0.503  0.510  0.688  0.498    0.667
+BoT:DoS→DDoS       0.502  0.498  0.498  0.502  0.504  0.523  0.524  0.973  0.498    0.608
+BoT:DDoS→DoS       0.500  0.500  0.500  0.500  0.504  0.510  0.515  0.876  0.501    0.995

@@ -1,0 +1,7 @@
+{
+ "cmd": "run",
+ "workers": 4,
+ "threads": 4,
+ "n_seeds": 10,
+ "stall_min": 40
+}

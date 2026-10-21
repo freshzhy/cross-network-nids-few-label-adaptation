@@ -1,0 +1,37 @@
+semantic_class,dataset,feature_set,n_L1,n_L1d,n_L2,n_L3,needs_dpi,needs_probe,max_level
+DoS,BoT,"Target-SHAP-10 (per seed, mean)",3.0,1.6,5.4,0.0,0.0,1.0,L2
+DoS,CIC,"Target-SHAP-10 (per seed, mean)",2.4,0.2,6.4,1.0,1.0,1.0,L3
+DoS,ToN,"Target-SHAP-10 (per seed, mean)",1.6,2.2,3.4,2.8,1.0,1.0,L3
+DoS,UNSW,"Target-SHAP-10 (per seed, mean)",3.8,1.8,3.8,0.6,0.6,1.0,L3
+Reconnaissance,BoT,"Target-SHAP-10 (per seed, mean)",4.0,1.0,5.0,0.0,0.0,1.0,L2
+Reconnaissance,ToN,"Target-SHAP-10 (per seed, mean)",3.4,2.0,3.6,1.0,1.0,1.0,L3
+Reconnaissance,UNSW,"Target-SHAP-10 (per seed, mean)",2.2,1.2,6.0,0.6,0.6,1.0,L3
+DoS,UNSW,Source SHAP-10,4.0,1.0,5.0,0.0,0.0,1.0,L2
+DoS,UNSW,Source MI-10,2.0,3.0,5.0,0.0,0.0,1.0,L2
+DoS,UNSW,Source Gain-10,0.0,1.0,8.0,1.0,1.0,1.0,L3
+DoS,UNSW,Source SHAP-10-NoPort,3.0,2.0,5.0,0.0,0.0,1.0,L2
+DoS,CIC,Source SHAP-10,3.0,1.0,6.0,0.0,0.0,1.0,L2
+DoS,CIC,Source MI-10,4.0,2.0,4.0,0.0,0.0,1.0,L2
+DoS,CIC,Source Gain-10,2.0,2.0,6.0,0.0,0.0,1.0,L2
+DoS,CIC,Source SHAP-10-NoPort,1.0,1.0,8.0,0.0,0.0,1.0,L2
+DoS,ToN,Source SHAP-10,2.0,1.0,4.0,3.0,1.0,1.0,L3
+DoS,ToN,Source MI-10,3.0,3.0,4.0,0.0,0.0,1.0,L2
+DoS,ToN,Source Gain-10,2.0,0.0,7.0,1.0,1.0,1.0,L3
+DoS,ToN,Source SHAP-10-NoPort,2.0,1.0,4.0,3.0,1.0,1.0,L3
+DoS,BoT,Source SHAP-10,3.0,1.0,6.0,0.0,0.0,1.0,L2
+DoS,BoT,Source MI-10,2.0,2.0,6.0,0.0,0.0,1.0,L2
+DoS,BoT,Source Gain-10,3.0,1.0,6.0,0.0,0.0,1.0,L2
+DoS,BoT,Source SHAP-10-NoPort,2.0,1.0,7.0,0.0,0.0,1.0,L2
+Reconnaissance,UNSW,Source SHAP-10,2.0,1.0,6.0,1.0,1.0,1.0,L3
+Reconnaissance,UNSW,Source MI-10,2.0,4.0,4.0,0.0,0.0,1.0,L2
+Reconnaissance,UNSW,Source Gain-10,1.0,1.0,5.0,3.0,1.0,1.0,L3
+Reconnaissance,UNSW,Source SHAP-10-NoPort,1.0,1.0,7.0,1.0,1.0,1.0,L3
+Reconnaissance,ToN,Source SHAP-10,4.0,2.0,3.0,1.0,1.0,1.0,L3
+Reconnaissance,ToN,Source MI-10,5.0,1.0,4.0,0.0,0.0,1.0,L2
+Reconnaissance,ToN,Source Gain-10,3.0,2.0,4.0,1.0,1.0,1.0,L3
+Reconnaissance,ToN,Source SHAP-10-NoPort,3.0,2.0,4.0,1.0,1.0,1.0,L3
+Reconnaissance,BoT,Source SHAP-10,4.0,1.0,5.0,0.0,0.0,1.0,L2
+Reconnaissance,BoT,Source MI-10,4.0,2.0,4.0,0.0,0.0,1.0,L2
+Reconnaissance,BoT,Source Gain-10,4.0,1.0,4.0,1.0,1.0,1.0,L3
+Reconnaissance,BoT,Source SHAP-10-NoPort,3.0,1.0,6.0,0.0,0.0,1.0,L2
+—,—,Full-40,9.0,4.0,22.0,5.0,1.0,1.0,L3

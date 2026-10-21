@@ -1,0 +1,8 @@
+{
+ "cmd": "run",
+ "workers": 1,
+ "n_seeds": 5,
+ "n_single": 2000,
+ "n_batch": 5,
+ "xgboost": "3.2.0"
+}

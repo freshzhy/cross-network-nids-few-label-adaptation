@@ -97,7 +97,7 @@ for ax, (comp, title) in zip(axes, comps):
     ax.grid(axis="x", lw=0.3, alpha=0.5)
 axes[0].set_yticks(y)
 axes[0].set_yticklabels(LABELS)
-save(fig, "Fig6_paired_differences")
+save(fig, "Fig4_paired_differences")
 
 # ── Fig. 9：环境类别 ─────────────────────────────────────────────
 rows = []
@@ -119,7 +119,7 @@ for ax, col, lab in [(axes[0], "f1", "(a) SHAP-10 F1"), (axes[1], "d", "(b) ΔF1
     ax.set_title(f"{lab}\nMann–Whitney p = {p:.3f}", loc="left")
     if col == "d":
         ax.axhline(0, color="#555555", lw=0.6)
-save(fig, "Fig7_environment")
+save(fig, "FigS6_environment")
 
 # ── Fig. 10：预测变量 ────────────────────────────────────────────
 jsd = pd.read_csv(R / "rq3_jsd" / "jsd_matrix.csv")
@@ -146,7 +146,7 @@ for ax, col, lab in [(axes[0], "jsd_all", "(a) JSD, all 40 features"),
     ax.axhline(0, color="#555555", lw=0.6)
 axes[0].set_ylabel("ΔF1 (SHAP-10 − Random-10)")
 axes[2].legend(loc="upper left", frameon=False, fontsize=6)
-save(fig, "Fig8_predictors")
+save(fig, "Fig5_predictors")
 
 # ── Fig. 11：零样本 ──────────────────────────────────────────────
 fig, axes = plt.subplots(1, 2, figsize=(W, 3.6), sharey=True)
@@ -166,5 +166,5 @@ axes[0].set_yticks(y)
 axes[0].set_yticklabels(LABELS)
 fig.legend(*axes[0].get_legend_handles_labels(), loc="lower center", ncol=2, frameon=False, bbox_to_anchor=(0.5, -0.04))
 fig.subplots_adjust(bottom=0.14)
-save(fig, "Fig9_zero_shot")
+save(fig, "Fig6_zero_shot")
 print("全部完成 →", OUT)

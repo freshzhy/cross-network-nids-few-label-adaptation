@@ -1,0 +1,15 @@
+hypothesis,test,n_configs,n_positive,mean_delta,p_config_wilcoxon,n_clusters,p_cluster_signflip
+H1,Full-40: F1(All) − F1(10),18,18,0.140188,9.5e-05,9,0.001953
+H1,Random-10: F1(All) − F1(10),18,18,0.128606,9.5e-05,9,0.001953
+H1,Source-SHAP-10: F1(All) − F1(10),18,18,0.138475,4e-06,9,0.001953
+H1,Source-MI-10: F1(All) − F1(10),18,18,0.135541,4e-06,9,0.001953
+H1,Source-Gain-10: F1(All) − F1(10),18,18,0.135203,4e-06,9,0.001953
+H1,Target-SHAP-10: F1(All) − F1(10),18,18,0.145167,9.5e-05,9,0.001953
+H1,Target-MI-10: F1(All) − F1(10),18,18,0.113508,9.5e-05,9,0.001953
+H1,Target-Gain-10: F1(All) − F1(10),18,18,0.130427,9.5e-05,9,0.001953
+H2,"Source-SHAP-10 − Random-10, mean over budgets [10, 25, 50, 100]",18,11,0.016375,0.017117,9,0.037109
+H2,"Source-MI-10 − Random-10, mean over budgets [10, 25, 50, 100]",18,15,0.012995,0.006016,9,0.099609
+H2,"Source-Gain-10 − Random-10, mean over budgets [10, 25, 50, 100]",18,14,-0.010879,0.054192,9,0.582031
+H3,"|Source-SHAP − Target-SHAP|: mean over [10, 25, 50, 100] − All",18,13,0.000964,0.221149,9,0.394531
+H3,"|Source-MI − Target-MI|: mean over [10, 25, 50, 100] − All",18,14,0.009629,0.033268,9,0.039062
+H3,"|Source-Gain − Target-Gain|: mean over [10, 25, 50, 100] − All",18,13,0.011063,0.021584,9,0.046875
